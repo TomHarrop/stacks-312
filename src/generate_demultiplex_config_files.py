@@ -1,11 +1,12 @@
-#!/usr/bin/env pyton3
+#!/usr/bin/env python3
 
 import os
 import pandas
 
-#############
-# FUNCTIONS #
-#############
+# globals
+key_file = 'data/SQ0003.txt'
+outdir = 'output/stacks_config'
+
 
 def parse_key_and_write_config_files(key_file, outdir):
     '''Group key_file rows by 'Flowcell' and 'Lane', and write tsv of 'Barcode'
@@ -27,13 +28,3 @@ def parse_key_and_write_config_files(key_file, outdir):
                           sep='\t',
                           header=False,
                           index=False)
-
-
-###########
-# GLOBALS #
-###########
-
-key_file = 'data/SQ0003.txt'
-
-# read key file
-key_data = pandas.read_csv(key_file, delimiter='\t')
