@@ -94,7 +94,7 @@ all_fc_lanes = [x for x in fc_lane_to_sample
 
 rule all:
     input:
-        expand('output/demux/{sample}.fq.gz',
+        expand('output/map/{sample}.bam',
                sample=all_samples)
 
 # extract per-flowcell/lane sample:barcode information
@@ -132,3 +132,38 @@ for fc_lane in all_fc_lanes:
             '--inline_null '
             '--renz_1 mspI --renz_2 apeKI '
             '&> {output.log}'
+
+# prepare reference genome
+rule prepare_reference:
+    input:
+        'data/genome.fasta'
+    params:
+        prefix = 'output/bwa_mem_index/genome.fa'
+    output:
+        'output/bwa_mem_index/genome.fasta.sa'
+    threads:
+        1
+    shell:
+        'bwa index '
+        '-p {params.prefix} '
+        '{input}'
+
+# map reads per sample
+rule map:
+    input:
+        'output/demux/{sample}.fq.gz'
+    output:
+        'output/map/{sample}.bam'
+    threads:
+        10
+    shell:
+        'bwa mem '
+        '-t {threads} '
+        '-L 100 '
+        '| samtools view '
+        '-hbu -F 2308 '
+        '| samtools sort '
+        '-l 9 -m 10G --threads {threads} '
+        '--output-fmt BAM '
+        '-o {output} '
+        '; samtools index {output}'
