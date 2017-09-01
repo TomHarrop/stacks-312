@@ -114,4 +114,5 @@ for fc_lane in all_fc_lanes:
             '-o output/demux '
             '-c -q -r '
             '--inline_null '
-            '--renz_1 mspI --renz_2 apeKI'
+            '--renz_1 mspI --renz_2 apeKI '
+            '&> {output.log}'
