@@ -112,7 +112,7 @@ for fc_lane in all_fc_lanes:
             '-i gzfastq -y gzfastq '
             '-b {input.config_file} '
             '-o output/demux '
-            '-c -q '
+            '-c -q -r '
             '--inline_null '
             '--renz_1 mspI --renz_2 apeKI '
             '&> {output.log}'
