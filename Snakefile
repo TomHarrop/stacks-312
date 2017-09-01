@@ -137,35 +137,33 @@ for fc_lane in all_fc_lanes:
 rule prepare_reference:
     input:
         'data/genome.fasta'
-    params:
-        prefix = 'output/bwa_mem_index/genome.fa'
     output:
-        'output/bwa_mem_index/genome.fasta.sa'
+        prefix = 'output/bwa_mem_index/genome.fa'
     threads:
         1
     shell:
+        'cp {input} {output.prefix} ; '
         'bwa index '
-        '-p {params.prefix} '
-        '{input}'
+        '{output.prefix}'
 
 # map reads per sample
 rule map:
     input:
-        'output/demux/{sample}.fq.gz'
+        fa = 'output/demux/{sample}.fq.gz',
+        index = 'output/bwa_mem_index/genome.fa'
     output:
         'output/map/{sample}.bam'
     threads:
         10
     shell:
-        'echo "'
         'bwa mem '
         '-t {threads} '
         '-L 100 '
-        '| samtools view '
+        '{input.index} {input.fa}'
+        '| bin/samtools/samtools view '
         '-hbu -F 2308 '
-        '| samtools sort '
+        '| bin/samtools/samtools sort '
         '-l 9 -m 10G --threads {threads} '
         '--output-fmt BAM '
         '-o {output} '
-        '; samtools index {output}'
-        '"'
+        '; bin/samtools/samtools index {output}'
