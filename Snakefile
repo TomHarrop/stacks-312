@@ -78,7 +78,7 @@ all_fc_lanes = [x for x in fc_lane_to_sample
 
 rule all:
     input:
-        expand('output/demux/{sample}.fastq.gz',
+        expand('output/demux/{sample}.fq.gz',
                sample=all_samples)
 
 
@@ -101,7 +101,7 @@ for fc_lane in all_fc_lanes:
             config_file = os.path.join(stacks_config_dir,
                                        '%s.config' % fc_lane)
         output:
-            expand('output/demux/{sample}.fastq.gz',
+            expand('output/demux/{sample}.fq.gz',
                    sample=fc_lane_to_sample[fc_lane]),
             log = 'output/demux/%s/%s.log' % (fc_lane, fc_lane)
         threads:
