@@ -141,10 +141,13 @@ rule prepare_reference:
         prefix = 'output/bwa_mem_index/genome.fa'
     threads:
         1
+    log:
+        'output/bwa_mem_index/index.log'
     shell:
         'cp {input} {output.prefix} ; '
         'bwa index '
-        '{output.prefix}'
+        '{output.prefix} '
+        '2> {log}'
 
 # map reads per sample
 rule map:
@@ -155,11 +158,14 @@ rule map:
         'output/map/{sample}.bam'
     threads:
         10
+    log:
+        'output/map/{sample}.log'
     shell:
         'bwa mem '
         '-t {threads} '
         '-L 100 '
-        '{input.index} {input.fa}'
+        '{input.index} {input.fa} '
+        '2> {log} '
         '| bin/samtools/samtools view '
         '-hbu -F 2308 '
         '| bin/samtools/samtools sort '
