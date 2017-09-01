@@ -1,7 +1,9 @@
 #!/usr/bin/env pyton3
 
+import csv
 import os
 import pandas
+import re
 
 
 #############
@@ -15,10 +17,11 @@ def parse_key_and_write_config_files(key_file, outdir):
     key_data = pandas.read_csv(key_file, delimiter='\t')
     grouped_key_data = key_data.groupby(['Flowcell', 'Lane'])
 
-    # write the key files by group
+    # make output directory
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
 
+    # write the key files by group
     for name, group in grouped_key_data:
         prefix = '_'.join([str(x) for x in name])
         config_file = os.path.join(outdir, '%s.config' % prefix)
@@ -28,6 +31,19 @@ def parse_key_and_write_config_files(key_file, outdir):
                           sep='\t',
                           header=False,
                           index=False)
+
+    # generate population map
+    sample_to_population = {}
+    for sample in key_data['Sample']:
+        sample_to_population[sample] = re.sub('\d', '', sample).lower()
+
+    # write the population map
+    population_map = os.path.join(outdir, 'population_map.txt')
+    with open(population_map, 'w') as f:
+        writer = csv.writer(f, delimiter="\t")
+        writer.writerows([x, sample_to_population[x]]
+                         for x in sample_to_population
+                         if x in all_samples)
 
 
 ###########
@@ -81,7 +97,6 @@ rule all:
         expand('output/demux/{sample}.fq.gz',
                sample=all_samples)
 
-
 # extract per-flowcell/lane sample:barcode information
 rule extract_barcode_config:
     input:
@@ -89,7 +104,8 @@ rule extract_barcode_config:
     output:
         expand('{stacks_config_dir}/{fc_lane}.config',
                stacks_config_dir=stacks_config_dir,
-               fc_lane=fc_lane_to_sample.keys())
+               fc_lane=fc_lane_to_sample.keys()),
+        os.path.join(stacks_config_dir, 'population_map.txt')
     run:
         parse_key_and_write_config_files(key_file, stacks_config_dir)
 
