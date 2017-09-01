@@ -157,6 +157,7 @@ rule map:
     threads:
         10
     shell:
+        'echo "'
         'bwa mem '
         '-t {threads} '
         '-L 100 '
@@ -167,3 +168,4 @@ rule map:
         '--output-fmt BAM '
         '-o {output} '
         '; samtools index {output}'
+        '"'
