@@ -138,7 +138,8 @@ rule prepare_reference:
     input:
         'data/genome.fasta'
     output:
-        'output/genome_index/genome.fa'
+        'output/genome_index/genome.fa',
+        'output/genome_index'
     threads:
         1
     log:
@@ -154,8 +155,8 @@ rule prepare_reference:
 # map reads per sample
 rule map:
     input:
-        fa = 'output/demux/{sample}.fq.gz',
-        index = 'output/bwa_mem_index/genome.fa'
+        fq = 'output/demux/{sample}.fq.gz',
+        index = 'output/genome_index'
     output:
         'output/map/{sample}.bam'
     threads:
@@ -163,19 +164,16 @@ rule map:
     log:
         'output/map/{sample}.log'
     shell:
-        'gsnap --nthreads={threads} '
-        ' -n 1 -m 5 -i 2 '
+        'bin/gmap/gsnap --nthreads={threads} '
+        '--npaths=1 '
+        '--max-mismatches=5 '
+        '--indel-penalty=2 '
         '--min-coverage=0.90 '
-        ' -A sam -d gac_gen_broads1_e64 '
-        ' -D ~/research/gsnap/gac_gen_broads1_e64 '
-        ' $src/samples/${file}.fq'
-        'bwa mem '
-        '-t {threads} '
-        '-L 100 '
-        '{input.index} {input.fa} '
+        '--format=sam '
+        '--db=genome '
+        '--dir={input.index} '
+        '{input.fq} '
         '2> {log} '
-        '| bin/samtools/samtools view '
-        '-hbu -F 2308 '
         '| bin/samtools/samtools sort '
         '-l 9 -m 10G --threads {threads} '
         '--output-fmt BAM '
