@@ -138,15 +138,17 @@ rule prepare_reference:
     input:
         'data/genome.fasta'
     output:
-        prefix = 'output/bwa_mem_index/genome.fa'
+        'output/genome_index/genome.fa'
     threads:
         1
     log:
-        'output/bwa_mem_index/index.log'
+        'output/genome_index/index.log'
     shell:
-        'cp {input} {output.prefix} ; '
-        'bwa index '
-        '{output.prefix} '
+        'cp {input} {output} ; '
+        'bin/gmap/gmap_build '
+        '--dir=output/genome_index '
+        '--db=genome '
+        '{output} '
         '2> {log}'
 
 # map reads per sample
@@ -161,6 +163,12 @@ rule map:
     log:
         'output/map/{sample}.log'
     shell:
+    'gsnap --nthreads={threads} '
+    ' -n 1 -m 5 -i 2 '
+    '--min-coverage=0.90 '
+    ' -A sam -d gac_gen_broads1_e64 '
+    ' -D ~/research/gsnap/gac_gen_broads1_e64 '
+    ' $src/samples/${file}.fq'
         'bwa mem '
         '-t {threads} '
         '-L 100 '
