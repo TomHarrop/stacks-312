@@ -163,12 +163,12 @@ rule map:
     log:
         'output/map/{sample}.log'
     shell:
-    'gsnap --nthreads={threads} '
-    ' -n 1 -m 5 -i 2 '
-    '--min-coverage=0.90 '
-    ' -A sam -d gac_gen_broads1_e64 '
-    ' -D ~/research/gsnap/gac_gen_broads1_e64 '
-    ' $src/samples/${file}.fq'
+        'gsnap --nthreads={threads} '
+        ' -n 1 -m 5 -i 2 '
+        '--min-coverage=0.90 '
+        ' -A sam -d gac_gen_broads1_e64 '
+        ' -D ~/research/gsnap/gac_gen_broads1_e64 '
+        ' $src/samples/${file}.fq'
         'bwa mem '
         '-t {threads} '
         '-L 100 '
