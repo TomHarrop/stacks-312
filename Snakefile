@@ -50,11 +50,18 @@ def parse_key_and_write_config_files(key_file, outdir):
 # GLOBALS #
 ###########
 
+# files and folders
 key_file = 'data/SQ0003.txt'
 reads_dir = 'data/raw_reads'
 outdir = 'output'
 stacks_config_dir = os.path.join(outdir, 'stacks_config')
 demultiplex_dir = os.path.join(outdir, 'demux')
+population_map = os.path.join(stacks_config_dir, 'population_map.txt')
+stacks_dir = os.path.join(outdir, 'stacks')
+populations_batch_id = '1'
+pop_output = os.path.join(
+    stacks_dir,
+    'batch_{0}.sumstats.tsv'.format(populations_batch_id))
 
 # read key file
 key_data = pandas.read_csv(key_file, delimiter='\t')
@@ -94,8 +101,7 @@ all_fc_lanes = [x for x in fc_lane_to_sample
 
 rule all:
     input:
-        expand('output/map/{sample}.bam',
-               sample=all_samples)
+        pop_output
 
 # extract per-flowcell/lane sample:barcode information
 rule extract_barcode_config:
@@ -105,7 +111,7 @@ rule extract_barcode_config:
         expand('{stacks_config_dir}/{fc_lane}.config',
                stacks_config_dir=stacks_config_dir,
                fc_lane=fc_lane_to_sample.keys()),
-        os.path.join(stacks_config_dir, 'population_map.txt')
+        population_map
     run:
         parse_key_and_write_config_files(key_file, stacks_config_dir)
 
@@ -180,3 +186,33 @@ rule map:
         '--output-fmt BAM '
         '-o {output} '
         '; bin/samtools/samtools index {output}'
+
+# run STACKS
+rule stacks:
+    input:
+        bamfiles = expand('output/map/{sample}.bam',
+                          sample=all_samples),
+        population_map = population_map
+    output:
+        stacks_db = os.path.join(stacks_dir, 'stacks.db'),
+        pop_output = pop_output
+    params:
+        prefix = stacks_dir
+    log:
+        os.path.join(stacks_dir, 'stacks.log')
+    run:
+        sample_string = ''
+        for sample in input.bamfiles:
+            sample_string += '-s {} '.format(sample)
+        shell('echo "'
+              'bin/stacks/ref_map.pl -T {threads} '
+              '-b {populations_batch_id} '
+              '-o {params.prefix} '
+              '-O {input.population_map} '
+              '-e bin/stacks '
+              '{sample_string} '
+              '--create_db '
+              '-B {output.stacks_db} '
+              '-D {populations_batch_id} '
+              '2> {log}'
+              '"')
