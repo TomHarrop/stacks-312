@@ -173,6 +173,7 @@ rule map:
         '--db=genome '
         '--dir={input.index} '
         '{input.fq} '
+        '--gunzip '
         '2> {log} '
         '| bin/samtools/samtools sort '
         '-l 9 -m 10G --threads {threads} '
