@@ -210,7 +210,8 @@ rule stacks:
               '-O {input.population_map} '
               '-e bin/stacks '
               '{sample_string} '
-              '--create_db '
-              '-B {output.stacks_db} '
-              '-D {populations_batch_id} '
+              '-S '
+              # '--create_db '
+              # '-B {output.stacks_db} '
+              # '-D {populations_batch_id} '
               '&> {log}')
