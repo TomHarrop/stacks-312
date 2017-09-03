@@ -194,10 +194,12 @@ rule stacks:
                           sample=all_samples),
         population_map = population_map
     output:
-        stacks_db = os.path.join(stacks_dir, 'stacks.db'),
+        # stacks_db = os.path.join(stacks_dir, 'stacks.db'),
         pop_output = pop_output
     params:
         prefix = stacks_dir
+    threads:
+        50
     log:
         os.path.join(stacks_dir, 'stacks.log')
     run:
