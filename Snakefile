@@ -204,8 +204,7 @@ rule stacks:
         sample_string = ''
         for sample in input.bamfiles:
             sample_string += '-s {} '.format(sample)
-        shell('echo "'
-              'bin/stacks/ref_map.pl -T {threads} '
+        shell('bin/stacks/ref_map.pl -T {threads} '
               '-b {populations_batch_id} '
               '-o {params.prefix} '
               '-O {input.population_map} '
@@ -214,5 +213,4 @@ rule stacks:
               '--create_db '
               '-B {output.stacks_db} '
               '-D {populations_batch_id} '
-              '2> {log}'
-              '"')
+              '2> {log}')
