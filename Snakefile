@@ -213,4 +213,4 @@ rule stacks:
               '--create_db '
               '-B {output.stacks_db} '
               '-D {populations_batch_id} '
-              '2> {log}')
+              '&> {log}')
