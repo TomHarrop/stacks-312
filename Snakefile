@@ -62,6 +62,8 @@ populations_batch_id = '1'
 pop_output = os.path.join(
     stacks_dir,
     'batch_{0}.sumstats.tsv'.format(populations_batch_id))
+stacks_db_dir = os.path.join(outdir, 'stacks_db')
+stacks_db_name = "stacks_radtags"
 
 # read key file
 key_data = pandas.read_csv(key_file, delimiter='\t')
@@ -194,7 +196,6 @@ rule stacks:
                           sample=all_samples),
         population_map = population_map
     output:
-        # stacks_db = os.path.join(stacks_dir, 'stacks.db'),
         pop_output = pop_output
     params:
         prefix = stacks_dir
@@ -213,7 +214,80 @@ rule stacks:
               '-e bin/stacks '
               '{sample_string} '
               '-S '
-              # '--create_db '
-              # '-B {output.stacks_db} '
-              # '-D {populations_batch_id} '
               '&> {log}')
+
+# convert stacks output to vcf
+rule create_vcf:
+    input:
+        pop_output = pop_output,
+        stacks_dir = stacks_dir
+    output:
+        os.path.join(outdir, 'populations')
+    threads:
+        50
+    log:
+        os.path.join(outdir, 'populations/populations.log')
+    shell:
+        'bin/stacks/populations '
+        '--in_path {input.stacks_dir} '
+        '--popmap {population_map} '
+        '--threads {threads} '
+        '-O {output} '
+        '--fstats --fst_correction bonferroni_win '
+        '--kernel_smoothed '
+        '--vcf '
+        '--vcf_haplotypes '
+        '--plink '
+        '--phylip '
+        '&>> {log}'
+
+# create an SQL database for stacks results
+rule create_stacks_db:
+    input:
+        stacks_dir = stacks_dir
+    output:
+        touch(os.path.join(stacks_db_dir, 'stacks_db.tmp'))
+    params:
+        db_name = stacks_db_name
+    log:
+        os.path.join(stacks_db_dir, 'create_db.log')
+    shell:
+        'mysql -e "CREATE DATABASE {params.db_name}" &> {log} ; '
+        'mysql {params.db_name} < bin/stacks/share/stacks/sql/stacks.sql'
+        '&>> {log}'
+
+# load stacks results into database (only works on local computer)
+rule load_stacks_db:
+    input:
+        os.path.join(stacks_db_dir, 'stacks_db.tmp')
+    output:
+        touch(os.path.join(stacks_db_dir, 'stacks_db_load.tmp'))
+    params:
+        db_name = stacks_db_name,
+        stacks_dir = stacks_dir
+    log:
+        os.path.join(stacks_db_dir, 'load_db.log')
+    shell:
+        'bin/stacks/bin/load_radtags.pl '
+        '-D {params.db_name} '
+        '-p {params.stacks_dir} '
+        '-b {populations_batch_id} '
+        '-M {population_map} '
+        '-c '
+        '&> {log}'
+
+# index the stacks database for speed
+rule index_stacks_db:
+    input:
+        os.path.join(stacks_db_dir, 'stacks_db_load.tmp')
+    output:
+        touch(os.path.join(stacks_db_dir, 'stacks_db_index.tmp'))
+    params:
+        db_name = stacks_db_name
+    log:
+        os.path.join(stacks_db_dir, 'index_db.log')
+    shell:
+        'bin/stacks/bin/index_radtags.pl '
+        '-D {params.db_name} '
+        '-c -t '
+        '&> {log}'
