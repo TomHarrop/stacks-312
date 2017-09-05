@@ -73,6 +73,9 @@ snprelate_dir = os.path.join(outdir, 'snprelate')
 gds = os.path.join(
             snprelate_dir,
             'batch_{}.gds'.format(populations_batch_id))
+pca = os.path.join(snprelate_dir,
+                   'batch_{}_pca.Rds'.format(populations_batch_id))
+
 stacks_db_dir = os.path.join(outdir, 'stacks_db')
 stacks_db_name = "stacks_radtags"
 
@@ -118,7 +121,7 @@ all_fc_lanes = [x for x in fc_lane_to_sample
 
 rule all:
     input:
-        pop_output
+        pca
 
 # extract per-flowcell/lane sample:barcode information
 rule extract_barcode_config:
@@ -274,8 +277,7 @@ rule run_pca:
     input:
         gds = gds
     output:
-        rds = os.path.join(snprelate_dir,
-                           'batch_{}_pca.Rds'.format(populations_batch_id))
+        pca
     threads:
         50
     log:
