@@ -265,6 +265,18 @@ rule convert_vcf_to_gds:
         '\''
         '&> {log}'
 
+rule run_pca:
+    input:
+        gds = os.path.join(outdir,
+                     'gds/batch_{}.gds'.format(populations_batch_id))
+    output:
+        rds = os.path.join(outdir,
+                     'gds/batch_{}_pca.Rds'.format(populations_batch_id))
+    threads:
+        50
+    script:
+        'src/generate_pca.R'
+
 # create an SQL database for stacks results
 rule create_stacks_db:
     input:
