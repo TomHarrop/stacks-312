@@ -217,8 +217,6 @@ rule stacks:
               '-S '
               '&> {log}')
 
-
-
 # convert stacks output to vcf
 rule create_vcf:
     input:
@@ -247,33 +245,6 @@ rule create_vcf:
         '--plink '
         '--phylip '
         '&>> {log}'
-
-rule convert_plink_to_binary:
-    input:
-        plink = os.path.join(populations_dir,
-                             'batch_{}.plink.ped'.format(populations_batch_id))
-    output:
-        os.path.join(outdir,
-                     'plink/batch_{}.bed'.format(populations_batch_id))
-    params:
-        base_out = os.path.join(
-            outdir,
-            'plink/batch_{}'.format(populations_batch_id)),
-        base_in = os.path.join(
-            populations_dir,
-            'batch_{}.plink'.format(populations_batch_id))
-    threads:
-        1
-    log:
-        os.path.join(outdir,
-                     'plink/plink.log')
-    shell:
-        'bin/plink/plink '
-        '--make-bed --allow-extra-chr  '
-        '--file {params.base_in} '
-        '--out {params.base_out} '
-        '&> {log}'
-
 
 rule convert_vcf_to_gds:
     input:
