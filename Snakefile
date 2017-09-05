@@ -256,10 +256,12 @@ rule convert_plink_to_binary:
         os.path.join(outdir,
                      'plink/batch_{}.bed'.format(populations_batch_id))
     params:
-        base_out = os.path.join(outdir,
-                            'plink/batch_{}'.format(populations_batch_id))
-        base_in = os.path.join(populations_dir,
-                               'batch_{}.plink'.format(populations_batch_id))
+        base_out = os.path.join(
+            outdir,
+            'plink/batch_{}'.format(populations_batch_id)),
+        base_in = os.path.join(
+            populations_dir,
+            'batch_{}.plink'.format(populations_batch_id))
     threads:
         1
     log:
