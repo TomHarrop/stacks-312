@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+print(snakemake)
+
 log_file <- snakemake@log
 sink(log_file, type = "output")
 sink(log_file, type = "message")
