@@ -268,12 +268,14 @@ rule convert_vcf_to_gds:
 rule run_pca:
     input:
         gds = os.path.join(outdir,
-                     'gds/batch_{}.gds'.format(populations_batch_id))
+                           'gds/batch_{}.gds'.format(populations_batch_id))
     output:
         rds = os.path.join(outdir,
-                     'gds/batch_{}_pca.Rds'.format(populations_batch_id))
+                           'gds/batch_{}_pca.Rds'.format(populations_batch_id))
     threads:
         50
+    log:
+        os.path.join(outdir, 'gds/PCA.log')
     script:
         'src/generate_pca.R'
 
