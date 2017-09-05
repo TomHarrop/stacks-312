@@ -255,14 +255,14 @@ rule convert_vcf_to_gds:
         os.path.join(outdir,
                      'gds/SNPRelate.log')
     shell:
-        'Rscript -e "'
+        'Rscript -e \''
         'library(SNPRelate) ; '
         'snpgdsVCF2GDS('
         '"{input.vcf}",'
         '"{output}",'
         'method = "copy.num.of.ref",'
         'verbose = TRUE)'
-        '"'
+        '\''
         '&> {log}'
 
 # create an SQL database for stacks results
