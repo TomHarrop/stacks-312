@@ -291,7 +291,7 @@ rule convert_vcf_to_gds:
         'snpgdsVCF2GDS('
         '"{input.vcf}",'
         '"{output}",'
-        'method = "copy.num.of.ref",'
+        'method = "biallelic.only",'
         'verbose = TRUE)'
         '\''
         '&> {log}'
@@ -309,6 +309,9 @@ rule run_pca:
         os.path.join(outdir, 'gds/PCA.log')
     script:
         'src/generate_pca.R'
+
+# after filtering the SNPs properly can easily do a pca with PLINK
+# e.g. ~/bin/plink/plink --pca --allow-extra-chr --vcf batch_1.vcf
 
 # create an SQL database for stacks results
 rule create_stacks_db:

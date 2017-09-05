@@ -1,7 +1,8 @@
 #!/usr/bin/env Rscript
 
 log_file <- file(snakemake@log[[1]], open = "wt")
-sink(log_file, type = "message")
+sink(log_file, append = TRUE, type = "message")
+sink(log_file, append = TRUE)
 
 library(SNPRelate)
 
@@ -15,8 +16,7 @@ gds <- snpgdsOpen(gds_file)
 snpset <- snpgdsLDpruning(gds,
                           ld.threshold=0.2,
                           missing.rate = 0.9,
-                          autosome.only = FALSE,
-                          num.thread = snakemake@threads)
+                          autosome.only = FALSE)
 snpset_ids <- unlist(snpset)
 
 # process pca
@@ -29,5 +29,6 @@ saveRDS(pca,
         snakemake@output[["rds"]])
 
 # close log
+sink()
 sink(type="message")
 close(log_file)
