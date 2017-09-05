@@ -1,7 +1,6 @@
 #!/usr/bin/env Rscript
 
 log_file <- snakemake@log[[1]]
-sink(log_file, type = "output")
 sink(log_file, type = "message")
 
 library(SNPRelate)
@@ -28,3 +27,7 @@ pca <- snpgdsPCA(gds,
 # save output
 saveRDS(pca,
         snakemake@output[["rds"]])
+
+# close log
+sink(type="message")
+close(log_file)
