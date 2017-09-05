@@ -51,6 +51,7 @@ def parse_key_and_write_config_files(key_file, outdir):
 ###########
 
 # files and folders
+reference = 'data/genome.fasta'
 key_file = 'data/SQ0003.txt'
 reads_dir = 'data/raw_reads'
 outdir = 'output'
@@ -62,9 +63,22 @@ populations_batch_id = '1'
 pop_output = os.path.join(
     stacks_dir,
     'batch_{0}.sumstats.tsv'.format(populations_batch_id))
+vcf = os.path.join(
+    stacks_dir,
+    'batch_{0}.vcf'.format(populations_batch_id))
+plink_base = os.path.join(
+    stacks_dir,
+    'batch_{0}.plink'.format(populations_batch_id))
+snprelate_dir = os.path.join(outdir, 'snprelate')
+gds = os.path.join(
+            snprelate_dir,
+            'batch_{}.gds'.format(populations_batch_id))
 stacks_db_dir = os.path.join(outdir, 'stacks_db')
 stacks_db_name = "stacks_radtags"
-populations_dir = os.path.join(outdir, 'populations')
+
+#########
+# SETUP #
+#########
 
 # read key file
 key_data = pandas.read_csv(key_file, delimiter='\t')
@@ -128,7 +142,7 @@ for fc_lane in all_fc_lanes:
         output:
             expand('output/demux/{sample}.fq.gz',
                    sample=fc_lane_to_sample[fc_lane]),
-            log = 'output/demux/%s/%s.log' % (fc_lane, fc_lane)
+            log = ('output/demux/logs/%s.log' % fc_lane)
         threads:
             1
         shell:
@@ -138,27 +152,39 @@ for fc_lane in all_fc_lanes:
             '-b {input.config_file} '
             '-o output/demux '
             '-c -q -r '
+            '-w 0.1 '           # window: approx. 9 bases
+            '-s 15 '            # minimum avg PHRED in window
             '--inline_null '
             '--renz_1 mspI --renz_2 apeKI '
             '&> {output.log}'
 
 # prepare reference genome
+rule filter_reference:
+    input:
+        reference = reference
+    output:
+        filtered_reference = 'output/genome_index/filtered_reference.fa'
+    params:
+        min_len = 1000
+    threads:
+        1
+    script:
+        'src/filter_reference.py'
+
 rule prepare_reference:
     input:
-        'data/genome.fasta'
+        'output/genome_index/filtered_reference.fa'
     output:
-        'output/genome_index/genome.fa',
-        'output/genome_index'
+        'output/genome_index/genome'
     threads:
         1
     log:
         'output/genome_index/index.log'
     shell:
-        'cp {input} {output} ; '
         'bin/gmap/gmap_build '
         '--dir=output/genome_index '
         '--db=genome '
-        '{output} '
+        '{input} '
         '2> {log}'
 
 # map reads per sample
@@ -197,7 +223,10 @@ rule stacks:
                           sample=all_samples),
         population_map = population_map
     output:
-        pop_output = pop_output
+        pop_output = pop_output,
+        vcf = vcf,
+        '{0}.ped'.format(plink_base),
+        '{0}.map'.format(plink_base)
     params:
         prefix = stacks_dir
     threads:
@@ -214,54 +243,28 @@ rule stacks:
               '-O {input.population_map} '
               '-e bin/stacks '
               '{sample_string} '
-              '-S '
+              '-S '                             # disable database
+              '-X: "populations:--vcf" '        # request populations output
+              '-X: "populations:--plink" '
+              '-X: "populations:--fstats" '
+              '-X: "populations:--fst_correction bonferroni_win" '
+              '-X: "populations:--kernel_smoothed" '
               '&> {log}')
-
-# convert stacks output to vcf
-rule create_vcf:
-    input:
-        pop_output = pop_output,
-        stacks_dir = stacks_dir
-    output:
-        dir = populations_dir,
-        vcf = os.path.join(populations_dir,
-                           'batch_{}.vcf'.format(populations_batch_id)),
-        plink = os.path.join(populations_dir,
-                           'batch_{}.plink.ped'.format(populations_batch_id))
-    threads:
-        50
-    log:
-        os.path.join(outdir, 'populations/populations.log')
-    shell:
-        'bin/stacks/populations '
-        '--in_path {input.stacks_dir} '
-        '--popmap {population_map} '
-        '--threads {threads} '
-        '-O {output.dir} '
-        '--fstats --fst_correction bonferroni_win '
-        '--kernel_smoothed '
-        '--vcf '
-        '--vcf_haplotypes '
-        '--plink '
-        '--phylip '
-        '&>> {log}'
 
 rule convert_vcf_to_gds:
     input:
-        vcf = os.path.join(populations_dir,
-                           'batch_{}.vcf'.format(populations_batch_id))
+        vcf = vcf
     output:
-        os.path.join(outdir,
-                     'gds/batch_{}.gds'.format(populations_batch_id))
+        gds = gds
     log:
-        os.path.join(outdir,
-                     'gds/SNPRelate.log')
+        os.path.join(snprelate_dir,
+                     'snprelate.log')
     shell:
         'Rscript -e \''
         'library(SNPRelate) ; '
         'snpgdsVCF2GDS('
         '"{input.vcf}",'
-        '"{output}",'
+        '"{output.gds}",'
         'method = "biallelic.only",'
         'verbose = TRUE)'
         '\''
@@ -269,15 +272,14 @@ rule convert_vcf_to_gds:
 
 rule run_pca:
     input:
-        gds = os.path.join(outdir,
-                           'gds/batch_{}.gds'.format(populations_batch_id))
+        gds = gds
     output:
-        rds = os.path.join(outdir,
-                           'gds/batch_{}_pca.Rds'.format(populations_batch_id))
+        rds = os.path.join(snprelate_dir,
+                           'batch_{}_pca.Rds'.format(populations_batch_id))
     threads:
         50
     log:
-        os.path.join(outdir, 'gds/PCA.log')
+        os.path.join(snprelate_dir, 'PCA.log')
     script:
         'src/generate_pca.R'
 
