@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-log_file <- snakemake@log[[1]]
+log_file <- file(snakemake@log[[1]], open = "wt")
 sink(log_file, type = "message")
 
 library(SNPRelate)
