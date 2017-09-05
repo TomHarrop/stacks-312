@@ -64,6 +64,7 @@ pop_output = os.path.join(
     'batch_{0}.sumstats.tsv'.format(populations_batch_id))
 stacks_db_dir = os.path.join(outdir, 'stacks_db')
 stacks_db_name = "stacks_radtags"
+populations_dir = os.path.join(outdir, 'populations')
 
 # read key file
 key_data = pandas.read_csv(key_file, delimiter='\t')
@@ -222,7 +223,9 @@ rule create_vcf:
         pop_output = pop_output,
         stacks_dir = stacks_dir
     output:
-        os.path.join(outdir, 'populations')
+        dir = populations_dir,
+        vcf = os.path.join(populations_dir,
+                           'batch_{}.vcf'.format(populations_batch_id))
     threads:
         50
     log:
@@ -232,7 +235,7 @@ rule create_vcf:
         '--in_path {input.stacks_dir} '
         '--popmap {population_map} '
         '--threads {threads} '
-        '-O {output} '
+        '-O {output.dir} '
         '--fstats --fst_correction bonferroni_win '
         '--kernel_smoothed '
         '--vcf '
@@ -240,6 +243,28 @@ rule create_vcf:
         '--plink '
         '--phylip '
         '&>> {log}'
+
+rule convert_vcf_to_gds:
+    input:
+        vcf = os.path.join(populations_dir,
+                           'batch_{}.vcf'.format(populations_batch_id))
+    output:
+        os.path.join(outdir,
+                     'gds/batch_{}.gds'.format(populations_batch_id))
+    log:
+        os.path.join(outdir,
+                     'gds/SNPRelate.log')
+    shell:
+        'echo "'
+        'Rscript -e "'
+        'library(SNPRelate) ; '
+        'snpgdsVCF2GDS('
+        '{input.vcf:q},'
+        '{output:q},'
+        'method = "copy.num.of.ref",'
+        'verbose = TRUE)'
+        '"'
+        '"'
 
 # create an SQL database for stacks results
 rule create_stacks_db:
