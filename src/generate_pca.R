@@ -22,6 +22,7 @@ snpset_ids <- unlist(snpset)
 # process pca
 pca <- snpgdsPCA(gds,
                  snp.id = snpset_ids,
+                 autosome.only = FALSE,
                  num.thread = snakemake@threads)
 
 # save output
