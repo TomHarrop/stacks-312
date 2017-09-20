@@ -246,9 +246,12 @@ rule stacks:
               '-O {input.population_map} '
               '-e bin/stacks '
               '{sample_string} '
+              '-m 10 '                          # 10 reads per stack
               '-S '                             # disable database
+              '-X: "populations:-p 6" '         # SNP filtering
+              '-X: "populations:-r 0.5" '
+              '-X: "populations:--min_maf 0.1" '
               '-X: "populations:--vcf" '        # request populations output
-              '-X: "populations:--plink" '
               '-X: "populations:--fstats" '
               '-X: "populations:--fst_correction bonferroni_win" '
               '-X: "populations:--kernel_smoothed" '
