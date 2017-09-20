@@ -194,7 +194,9 @@ rule prepare_reference:
 rule map:
     input:
         fq = 'output/demux/{sample}.fq.gz',
-        index = 'output/genome_index'
+        index = 'output/genome_index/genome'
+    params:
+        genome_dir = 'output/genome_index'
     output:
         'output/map/{sample}.bam'
     threads:
@@ -209,7 +211,7 @@ rule map:
         '--min-coverage=0.90 '
         '--format=sam '
         '--db=genome '
-        '--dir={input.index} '
+        '--dir={params.genome_dir} '
         '{input.fq} '
         '--gunzip '
         '2> {log} '
