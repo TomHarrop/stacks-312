@@ -250,13 +250,13 @@ rule stacks:
               '{sample_string} '
               '-m 10 '                          # 10 reads per stack
               '-S '                             # disable database
-              '-X: "populations:-p 6" '         # SNP filtering
-              '-X: "populations:-r 0.5" '
-              '-X: "populations:--min_maf 0.1" '
-              '-X: "populations:--vcf" '        # request populations output
-              '-X: "populations:--fstats" '
-              '-X: "populations:--fst_correction bonferroni_win" '
-              '-X: "populations:--kernel_smoothed" '
+              '-X "populations:-p 6" '         # SNP filtering
+              '-X "populations:-r 0.5" '
+              '-X "populations:--min_maf 0.1" '
+              '-X "populations:--vcf" '        # request populations output
+              '-X "populations:--fstats" '
+              '-X "populations:--fst_correction bonferroni_win" '
+              '-X "populations:--kernel_smoothed" '
               '&> {log}')
 
 rule convert_vcf_to_gds:
