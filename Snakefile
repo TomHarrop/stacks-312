@@ -66,9 +66,6 @@ pop_output = os.path.join(
 vcf = os.path.join(
     stacks_dir,
     'batch_{0}.vcf'.format(populations_batch_id))
-plink_base = os.path.join(
-    stacks_dir,
-    'batch_{0}.plink'.format(populations_batch_id))
 snprelate_dir = os.path.join(outdir, 'snprelate')
 gds = os.path.join(
             snprelate_dir,
@@ -246,7 +243,7 @@ rule stacks:
               '-O {input.population_map} '
               '-e bin/stacks '
               '{sample_string} '
-              '-m 10 '                          # 10 reads per stack
+              '-m 5 '                          # 10 reads per stack
               '-S '                             # disable database
               '-X "populations:-p 6" '         # SNP filtering
               '-X "populations:-r 0.5" '
