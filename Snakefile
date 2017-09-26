@@ -200,7 +200,7 @@ rule map:
     output:
         'output/map/{sample}.bam'
     threads:
-        10
+        50
     log:
         'output/map/{sample}.log'
     shell:
