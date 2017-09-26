@@ -228,8 +228,6 @@ rule stacks:
                           sample=all_samples),
         population_map = population_map
     output:
-        '{0}.ped'.format(plink_base),
-        '{0}.map'.format(plink_base),
         pop_output = pop_output,
         vcf = vcf
     params:
