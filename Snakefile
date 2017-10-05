@@ -275,7 +275,8 @@ rule fst_bootstrap:
         '-M {input.population_map} '
         '-p 6 -r 0.5 --min_maf 0.1 '
         '--fstats --fst_correction bonferroni_win --kernel_smoothed '
-        '--bootstrap -N 1000 '
+        '--bootstrap '
+        '--bootstrap_reps 1000 '
         '&> {log}'
 
 rule convert_vcf_to_gds:
