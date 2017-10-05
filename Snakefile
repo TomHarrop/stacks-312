@@ -254,6 +254,30 @@ rule stacks:
               '-X "populations:--kernel_smoothed" '
               '&> {log}')
 
+# re-run populations for FST bootstrapping
+rule fst_bootstrap:
+    input:
+        pop_output = pop_output,
+        population_map = population_map
+    output:
+        'output/populations/batch_1.phistats.tsv'
+    params:
+        wd = 'output/populations'
+    threads:
+        50
+    log:
+        'output/populations/populations.log'
+    shell:
+        'bin/stacks/populations '
+        '-b 1 -P output/stacks '
+        '--out_path {params.wd} '
+        '-s -t {threads} '
+        '-M {input.population_map} '
+        '-p 6 -r 0.5 --min_maf 0.1 '
+        '--fstats --fst_correction bonferroni_win --kernel_smoothed '
+        '--bootstrap -N 1000 '
+        '&> {log}'
+
 rule convert_vcf_to_gds:
     input:
         vcf = vcf
