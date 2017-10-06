@@ -277,7 +277,7 @@ rule fst_bootstrap:
         '--fstats --fst_correction p_value '
         '--kernel_smoothed '
         '--bootstrap '
-        '--bootstrap_reps 1000 '
+        '--bootstrap_reps 100 '
         '&> {log}'
 
 rule convert_vcf_to_gds:
