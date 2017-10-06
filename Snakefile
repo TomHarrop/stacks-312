@@ -250,7 +250,7 @@ rule stacks:
               '-X "populations:--min_maf 0.1" '
               '-X "populations:--vcf" '        # request populations output
               '-X "populations:--fstats" '
-              '-X "populations:--fst_correction bonferroni_win" '
+              '-X "populations:--fst_correction p_value" '
               '-X "populations:--kernel_smoothed" '
               '&> {log}')
 
@@ -274,7 +274,8 @@ rule fst_bootstrap:
         '-s -t {threads} '
         '-M {input.population_map} '
         '-p 6 -r 0.5 --min_maf 0.1 '
-        '--fstats --fst_correction bonferroni_win --kernel_smoothed '
+        '--fstats --fst_correction p_value '
+        '--kernel_smoothed '
         '--bootstrap '
         '--bootstrap_reps 1000 '
         '&> {log}'
