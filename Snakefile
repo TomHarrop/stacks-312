@@ -326,7 +326,7 @@ rule create_stacks_db:
         os.path.join(stacks_db_dir, 'create_db.log')
     shell:
         'mysql -e "CREATE DATABASE {params.db_name}" &> {log} ; '
-        'mysql {params.db_name} < bin/stacks/share/stacks/sql/stacks.sql'
+        'mysql {params.db_name} < bin/stacks/share/stacks/sql/stacks.sql '
         '&>> {log}'
 
 # load stacks results into database (only works on local computer)
@@ -361,6 +361,7 @@ rule index_stacks_db:
         os.path.join(stacks_db_dir, 'index_db.log')
     shell:
         'bin/stacks/bin/index_radtags.pl '
+        '-s bin/stacks/share/stacks/sql '
         '-D {params.db_name} '
         '-c -t '
         '&> {log}'
