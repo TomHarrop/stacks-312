@@ -142,10 +142,12 @@ for fc_lane in all_fc_lanes:
         output:
             expand('output/demux/{sample}.fq.gz',
                    sample=fc_lane_to_sample[fc_lane]),
-            log = ('output/demux/logs/%s.log' % fc_lane)
+        log:
+            'output/demux/logs/{0}.log'.format(fc_lane)
         threads:
             1
         shell:
+            'echo \''
             'bin/stacks/process_radtags '
             '-f {input.read_file} '
             '-i gzfastq -y gzfastq '
@@ -159,6 +161,7 @@ for fc_lane in all_fc_lanes:
             '--inline_null '
             '--renz_1 apeKI --renz_2 mspI '
             '&> {output.log}'
+            '\''
 
 # prepare reference genome
 rule filter_reference:
