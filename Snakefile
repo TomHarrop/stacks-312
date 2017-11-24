@@ -160,7 +160,7 @@ for fc_lane in all_fc_lanes:
             '-s 15 '                  # minimum avg PHRED in window
             '--inline_null '
             '--renz_1 apeKI --renz_2 mspI '
-            '&> {output.log}'
+            '&> {log}'
             '\''
 
 # prepare reference genome
