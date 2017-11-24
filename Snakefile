@@ -153,10 +153,10 @@ for fc_lane in all_fc_lanes:
             '-b {input.config_file} '
             '-o output/demux '
             '-c -q '
-            '-r --barcode_dist 2 '    # rescue barcodes
-            '-t 91 '                  # truncate output to 91 b
-            '-w 0.1 '                 # window: approx. 9 bases
-            '-s 15 '                  # minimum avg PHRED in window
+            # '-r --barcode_dist_1 1 '    # rescue barcodes
+            '-t 91 '                    # truncate output to 91 b
+            '-w 0.1 '                   # window: approx. 9 bases
+            '-s 15 '                    # minimum avg PHRED in window
             '--inline_null '
             '--renz_1 apeKI --renz_2 mspI '
             '&> {log}'
