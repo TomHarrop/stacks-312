@@ -147,7 +147,6 @@ for fc_lane in all_fc_lanes:
         threads:
             1
         shell:
-            'echo \''
             'bin/stacks/process_radtags '
             '-f {input.read_file} '
             '-i gzfastq -y gzfastq '
@@ -161,7 +160,6 @@ for fc_lane in all_fc_lanes:
             '--inline_null '
             '--renz_1 apeKI --renz_2 mspI '
             '&> {log}'
-            '\''
 
 # prepare reference genome
 rule filter_reference:
