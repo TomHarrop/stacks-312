@@ -151,11 +151,13 @@ for fc_lane in all_fc_lanes:
             '-i gzfastq -y gzfastq '
             '-b {input.config_file} '
             '-o output/demux '
-            '-c -q -r '
-            '-w 0.1 '           # window: approx. 9 bases
-            '-s 15 '            # minimum avg PHRED in window
+            '-c -q '
+            '-r --barcode_dist 2 '    # rescue barcodes
+            '-t 91 '                  # truncate output to 91 b
+            '-w 0.1 '                 # window: approx. 9 bases
+            '-s 15 '                  # minimum avg PHRED in window
             '--inline_null '
-            '--renz_1 mspI --renz_2 apeKI '
+            '--renz_1 apeKI --renz_2 mspI '
             '&> {output.log}'
 
 # prepare reference genome
