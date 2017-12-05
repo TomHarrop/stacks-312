@@ -390,8 +390,10 @@ rule stacks_denovo:
     shell:
         'bin/stacks/denovo_map.pl '
         '--samples {input.sample_dir} '
-        '--popmap {input.population_map} '
+        '-O {input.population_map} '
+        '-b 1 '
         '-T {threads} '
+        '-e bin/stacks '
         '-o {params.wd} '
         '-S '
         '-m 3 '
