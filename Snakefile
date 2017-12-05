@@ -368,3 +368,34 @@ rule index_stacks_db:
         '-D {params.db_name} '
         '-c -t '
         '&> {log}'
+
+# run optimised stacks denovo
+rule stacks_denovo:
+    input:
+        samples = expand('output/demux/{sample}.fq.gz',
+                         sample=all_samples),
+        sample_dir = 'output/demux',
+        population_map = population_map
+    output:
+        populations_sumstats = ('output/stacks_denovo/'
+                                'populations.sumstats.tsv'),
+        populations_haplotypes = ('outdir/stacks_denovo/'
+                                  'populations.haplotypes.tsv'),
+    params:
+        wd = 'output/stacks_denovo'
+    threads:
+        50
+    log:
+        'output/stacks_denovo/stacks.log'
+    shell:
+        'bin/stacks/bin/denovo_map.pl '
+        '--samples {input.sample_dir} '
+        '--popmap {input.population_map} '
+        '-T {threads} '
+        '-o {params.wd} '
+        '-S '
+        '-m 3 '
+        '-M 3 '
+        '-n 3 '
+        '-X "populations:-r 0.8"'
+        '&> {log} '
