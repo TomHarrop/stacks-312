@@ -388,7 +388,7 @@ rule stacks_denovo:
     log:
         'output/stacks_denovo/stacks.log'
     shell:
-        'bin/stacks/bin/denovo_map.pl '
+        'bin/stacks/denovo_map.pl '
         '--samples {input.sample_dir} '
         '--popmap {input.population_map} '
         '-T {threads} '
