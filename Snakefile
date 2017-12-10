@@ -381,6 +381,7 @@ rule stacks_denovo:
                                 'populations.sumstats.tsv'),
         populations_haplotypes = ('outdir/stacks_denovo/'
                                   'populations.haplotypes.tsv'),
+        dm_log = 'output/stacks_denovo/denovo_map.log'
     params:
         wd = 'output/stacks_denovo'
     threads:
@@ -401,3 +402,32 @@ rule stacks_denovo:
         '-n 3 '
         '-X "populations:-r 0.8"'
         '&> {log} '
+
+# get stats
+rule stacks_denovo_covstats:
+    input:
+        dm_log = 'output/stacks_denovo/denovo_map.log'
+    threads:
+        1
+    output:
+        coverage_stats = 'output/run_stats/covstats.csv'
+    script:
+        'src/parse_denovo_map_logs.py'
+
+rule stacks_denovo_samplestats:
+    input:
+        populations_sumstats = ('output/stacks_denovo/'
+                                'populations.sumstats.tsv'),
+        map = population_map
+    params:
+        stats_dir = 'output/stacks_denovo'
+    threads:
+        1
+    output:
+        pop_stats = 'output/run_stats/popstats.csv',
+        sample_stats = 'output/run_stats/samplestats.csv'
+    log:
+        log = 'output/run_stats/parse_stacks_output.log'
+    script:
+        'src/parse_stacks_output.R'
+
